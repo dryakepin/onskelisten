@@ -1,33 +1,24 @@
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
-import { authClient, getOwnerEmail } from "@/lib/owner";
-
-async function signIn() {
-  "use server";
-  const h = await headers();
-  const origin = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
-  const supabase = await authClient();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo: `${origin}/auth/callback` },
-  });
-  if (error || !data.url) redirect("/login?fejl=google");
-  redirect(data.url);
-}
+import { signInWithGoogle } from "../auth/actions";
+import { currentGiver } from "@/lib/giver";
+import { getOwnerEmail } from "@/lib/owner";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ fejl?: string }> }) {
   if (await getOwnerEmail()) redirect("/admin");
+  if (await currentGiver()) redirect("/");
   const { fejl } = await searchParams;
   return (
-    <main className="wrap narrow">
+    <main className="narrow">
       <h1>Kåres ønskeliste</h1>
-      <p className="muted">Log ind for at redigere listen.</p>
-      {fejl === "adgang" && <div className="banner warn">Den Google-konto har ikke adgang til at redigere listen.</div>}
+      <p className="muted">Log ind med din Google-konto for at se listen og reservere gaver.</p>
+      {fejl === "adgang" && (
+        <div className="banner warn">Den Google-konto er ikke på familielisten. Prøv en anden konto, eller bed Kåre om at tilføje din adresse.</div>
+      )}
       {fejl === "google" && <div className="banner warn">Login med Google mislykkedes. Prøv igen.</div>}
-      <form action={signIn}>
+      <form action={signInWithGoogle}>
         <button className="btn primary" type="submit">Log ind med Google</button>
       </form>
-      <p className="muted small">Er du familie? Brug linket fra Kåres mail – du skal ikke logge ind.</p>
+      <p className="muted small">Du kan også åbne listen med det personlige link fra Kåres mail.</p>
     </main>
   );
 }

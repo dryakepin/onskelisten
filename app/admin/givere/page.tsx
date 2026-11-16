@@ -9,7 +9,7 @@ export default async function GiversPage() {
   const givers = await listGivers();
   return (
     <>
-      <p className="muted">Familien åbner listen med deres personlige link – uden login. Et nyt link gør det gamle ugyldigt.</p>
+      <p className="muted">Familien logger ind med Google (adressen herunder skal være deres Google-konto) eller åbner listen med deres personlige link. Et nyt link gør det gamle ugyldigt.</p>
       <div className="recips">
         {givers.map((g) => (
           <div className="rrow giver" key={g.id}>
