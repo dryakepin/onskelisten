@@ -20,3 +20,12 @@ export function daysUntil(month: number, day: number, from: Date = new Date()): 
 export function occasionFor(season: Season) {
   return season === "xmas" ? ("jul" as const) : ("fødselsdag" as const);
 }
+
+/**
+ * The calendar candle (kalenderlys): 1–24 in December is the number at the top of the candle that day,
+ * with the earlier numbers burnt away. Null outside 1–24 December: the candle is whole and unlit.
+ */
+export function candleDay(d: Date): number | null {
+  const day = d.getDate();
+  return d.getMonth() === 11 && day >= 1 && day <= 24 ? day : null;
+}

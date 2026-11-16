@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Hero from "@/components/Hero";
 import WishCard from "@/components/WishCard";
 import { markBought, release, reserve } from "./actions";
 import { signInWithGoogle } from "./auth/actions";
@@ -16,7 +17,7 @@ export default async function Home() {
     const owner = await getOwnerEmail();
     return (
       <main className="narrow">
-        <h1>Kåres ønskeliste</h1>
+        <Hero><h1>Kåres ønskeliste</h1></Hero>
         {owner ? (
           <p><Link href="/admin">Gå til din liste</Link></p>
         ) : (
@@ -36,15 +37,19 @@ export default async function Home() {
   const visible = wishes.filter((w) => w.status === "active" && !w.suggested);
   const byWish = new Map(reservations.map((r) => [r.wish_id, r]));
   const nameOf = new Map(givers.map((g) => [g.id, g.name]));
+  // The kravlenisse sits on the first wish nobody has taken yet.
+  const nisseId = visible.find((w) => !byWish.has(w.id))?.id;
   const mine = reservations.filter((r) => r.giver_id === giver.id).length;
 
   return (
     <>
       <div className="topbar">
-        <header>
-          <h1>Kåres ønskeliste</h1>
-          <p>Hej {giver.name}. Tryk “Reservér” ved det, du vil give – så kan de andre se, at det er taget.{mine ? ` Du har reserveret ${mine}.` : ""}</p>
-        </header>
+        <Hero>
+          <header>
+            <h1>Kåres ønskeliste</h1>
+            <p>Hej {giver.name}. Tryk “Reservér” ved det, du vil give – så kan de andre se, at det er taget.{mine ? ` Du har reserveret ${mine}.` : ""}</p>
+          </header>
+        </Hero>
         <form action="/auth/signout" method="post">
           <button className="btn ghost sm" type="submit">Log ud</button>
         </form>
@@ -60,17 +65,17 @@ export default async function Home() {
               const r = byWish.get(w.id);
               const isMine = r?.giver_id === giver.id;
               const who = r ? (isMine ? "dig" : (nameOf.get(r.giver_id) ?? "en anden")) : "";
-              const tag = r ? <span className="tag res">{r.status === "bought" ? "Købt" : "Reserveret"} af {who}</span> : null;
+              const tag = r ? <span className={`tag res ${isMine ? "mine" : "other"}`}>{r.status === "bought" ? "Købt" : "Reserveret"} af {who}</span> : null;
               const hidden = <input type="hidden" name="wish_id" value={w.id} />;
               const actions = !r ? (
-                <form action={reserve}>{hidden}<button className="btn sm primary" type="submit">Reservér</button></form>
+                <form action={reserve}>{hidden}<button className="btn primary" type="submit">Reservér</button></form>
               ) : isMine ? (
                 <>
-                  {r.status !== "bought" && <form action={markBought}>{hidden}<button className="btn sm" type="submit">Markér som købt</button></form>}
-                  <form action={release}>{hidden}<button className="btn ghost sm" type="submit">Fortryd</button></form>
+                  {r.status !== "bought" && <form action={markBought}>{hidden}<button className="btn" type="submit">Markér som købt</button></form>}
+                  <form action={release}>{hidden}<button className="btn ghost" type="submit">Fortryd</button></form>
                 </>
               ) : null;
-              return <WishCard key={w.id} wish={w} tag={tag} actions={actions} />;
+              return <WishCard key={w.id} wish={w} tag={tag} actions={actions} wrap={r ? (isMine ? "mine" : "other") : undefined} nisse={w.id === nisseId} />;
             })}
           </section>
         );

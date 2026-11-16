@@ -4,35 +4,62 @@ import type { Season } from "@/lib/season";
 
 const rnd = (a: number, b: number) => a + Math.random() * (b - a);
 
+/** Calendar candle. `day` 1–24: that number is on top and the flame is lit; null: whole and unlit. */
+export function candle(day: number | null): string {
+  const left = day == null ? 24 : 25 - day, first = 25 - left;
+  const T = 42, B = 8, base = T + left * B, H = base + 20;
+  let lines = "", nums = "";
+  for (let k = 0; k < left; k++) {
+    if (k) lines += `M19 ${T + B * k}H43`;
+    nums += `<tspan x="31" ${k ? `dy="${B}"` : `y="${T + 6.3}"`}>${first + k}</tspan>`;
+  }
+  const flame = day == null ? "" : `<g class="flame"><circle cx="31" cy="26" r="26" fill="#f2b65a" opacity=".16"/><circle cx="31" cy="26" r="15" fill="#f2b65a" opacity=".22"/>
+    <path class="flame-body" d="M31 8 C 38 20 39 28 31 36 C 23 28 24 20 31 8 Z" fill="#f2b65a"/><path d="M31 20 C 34 26 34 30 31 34 C 28 30 28 26 31 20 Z" fill="#fff4d6"/></g>`;
+  return `<svg viewBox="0 0 62 ${H}" width="62" height="${H}" xmlns="http://www.w3.org/2000/svg">${flame}
+    <line x1="31" y1="35" x2="31" y2="${T}" stroke="${day == null ? "#f3ead8" : "#2a2420"}" stroke-width="1.6"/>
+    <rect x="19" y="${T}" width="24" height="${left * B}" rx="3" fill="#f7f0e1"/>
+    <path d="${lines}" stroke="#a8202b" stroke-width=".8" fill="none"/>
+    <text fill="#a8202b" font-family="Inter,sans-serif" font-size="6.5" font-weight="600" text-anchor="middle">${nums}</text>
+    <path d="M8 ${base} H54 L50 ${base + 10} H12 Z" fill="#c8962e"/><rect x="4" y="${base + 10}" width="54" height="5" rx="2.5" fill="#c8962e"/>
+    <path d="M2 ${base + 2} l10 -6 M4 ${base + 8} l10 -3 M60 ${base + 2} l-10 -6 M58 ${base + 8} l-10 -3" stroke="#2f6b4f" stroke-width="2.4" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/** Christmas: a spruce branch hung with woven hearts, paper cones, stars and flags. Shown unscaled; narrow screens see the middle. */
+function spruceGarland(): string {
+  const W = 860, H = 92, n = 15, sag = 24;
+  const y = (x) => 12 + sag * 4 * (x / W) * (1 - x / W);
+  const heart = (x, cy, fill, line) => `<path transform="translate(${x} ${cy}) scale(1.7)" d="M0 7 L-7 -1 A4.05 4.05 0 0 1 0 -5 A4.05 4.05 0 0 1 7 -1 Z" fill="${fill}" stroke="${line}" stroke-width=".8"/>
+    <path transform="translate(${x} ${cy}) scale(1.7)" d="M-4.6 -2.6 L1 3 M-2.2 -4.6 L3.4 1 M4.6 -2.6 L-1 3 M2.2 -4.6 L-3.4 1" stroke="${line}" stroke-width=".9" fill="none"/>`;
+  let s = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+    <path d="M-4 12 Q ${W / 2} ${12 + sag * 2} ${W + 4} 12" fill="none" stroke="#2f6b4f" stroke-width="5" stroke-linecap="round"/>`;
+  let needles = "";
+  for (let x = 14; x < W; x += 28) { const yy = y(x); needles += `M${x} ${yy.toFixed(1)} l-6 9 M${x} ${yy.toFixed(1)} l5 10 `; }
+  s += `<path d="${needles}" stroke="#2f6b4f" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+  for (let i = 1; i <= n; i++) {
+    const x = i * W / (n + 1), yy = y(x), k = i % 5;
+    const string = (len) => `<line x1="${x}" y1="${yy}" x2="${x}" y2="${yy + len}" stroke="#b9c4b8" stroke-width="1"/>`;
+    if (k === 1) s += string(12) + heart(x, yy + 26, "#a8202b", "#f3ead8");
+    else if (k === 2) s += string(8) + `<path d="M${x - 12} ${yy + 8} L${x + 12} ${yy + 8} L${x} ${yy + 40} Z" fill="#f3ead8" stroke="#c8962e" stroke-width="1.2"/><path d="M${x - 9} ${yy + 16} L${x + 9} ${yy + 16} M${x - 6} ${yy + 24} L${x + 6} ${yy + 24}" stroke="#a8202b" stroke-width="2"/>`;
+    else if (k === 3) { const r = 13, pts = [...Array(10)].map((_, j) => { const a = -Math.PI / 2 + j * Math.PI / 5, rr = j % 2 ? r * .45 : r; return (x + rr * Math.cos(a)).toFixed(1) + "," + (yy + 21 + rr * Math.sin(a)).toFixed(1); }).join(" ");
+      s += string(8) + `<polygon points="${pts}" fill="#c8962e"/>`; }
+    else if (k === 4) s += string(8) + `<rect x="${x - 15}" y="${yy + 8}" width="30" height="22" fill="#a8202b"/><rect x="${x - 6}" y="${yy + 8}" width="4" height="22" fill="#f3ead8"/><rect x="${x - 15}" y="${yy + 17}" width="30" height="4" fill="#f3ead8"/>`;
+    else s += string(12) + heart(x, yy + 26, "#f3ead8", "#a8202b");
+  }
+  return s + "</svg>";
+}
+
 export function garland(kind: Season): string {
-  const W=860,H=64,n=kind==="xmas"?15:13; const sag=22;
+  if (kind === "xmas") return spruceGarland();
+  const W=860,H=64,n=13; const sag=22;
   const y=x=>8+sag*4*(x/W)*(1-x/W);
   let s=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M0 8 Q ${W/2} ${8+sag*2} ${W} 8" fill="none" stroke="${kind==="xmas"?"var(--accent)":"var(--muted)"}" stroke-width="1.5" opacity=".6"/>`;
-  if(kind==="xmas") s+=`<defs><pattern id="weave" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-      <rect width="5" height="5" fill="#c8102e"/><rect width="2.5" height="2.5" fill="#fff"/><rect x="2.5" y="2.5" width="2.5" height="2.5" fill="#fff"/></pattern></defs>`;
+    <path d="M0 8 Q ${W/2} ${8+sag*2} ${W} 8" fill="none" stroke="var(--muted)" stroke-width="1.5" opacity=".6"/>`;
   for(let i=1;i<=n;i++){
     const x=i*W/(n+1), yy=y(x);
-    if(kind==="xmas"){
-      const k=Math.floor(i/2)%3;
-      if(i%2===0){ // flettet julehjerte
-        const cy=yy+15;
-        s+=`<line x1="${x}" y1="${yy}" x2="${x}" y2="${cy-5}" stroke="var(--muted)" stroke-width="1"/>
-          <path transform="translate(${x} ${cy}) scale(1.25)" d="M0 6 L-7 -1 A4.05 4.05 0 0 1 0 -5 A4.05 4.05 0 0 1 7 -1 Z" fill="url(#weave)" stroke="#a50d26" stroke-width=".6"/>`;
-      } else if(k===0){ // stjerne
-        const r=7, pts=[...Array(10)].map((_,j)=>{const a=-Math.PI/2+j*Math.PI/5, rr=j%2?r*.45:r; return (x+rr*Math.cos(a)).toFixed(1)+","+(yy+14+rr*Math.sin(a)).toFixed(1)}).join(" ");
-        s+=`<line x1="${x}" y1="${yy}" x2="${x}" y2="${yy+7}" stroke="var(--muted)" stroke-width="1"/><polygon points="${pts}" fill="var(--gold)"/>`;
-      } else { // julekugle
-        const c=k===1?"var(--berry)":"var(--accent)";
-        s+=`<line x1="${x}" y1="${yy}" x2="${x}" y2="${yy+6}" stroke="var(--muted)" stroke-width="1"/>
-          <rect x="${x-2.5}" y="${yy+5}" width="5" height="3" rx="1" fill="var(--gold)"/>
-          <circle cx="${x}" cy="${yy+16}" r="8" fill="${c}"/><circle cx="${x-2.6}" cy="${yy+13.4}" r="2" fill="#fff" opacity=".35"/>`;
-      }
-    } else { // Dannebrog-flag på snor
-      const w=30,h=22,fx=x-w/2,fy=yy+2;
-      s+=`<g transform="rotate(${(i%2?-3:3)} ${x} ${yy})"><rect x="${fx}" y="${fy}" width="${w}" height="${h}" fill="#c8102e"/>
-        <rect x="${fx+10}" y="${fy}" width="4" height="${h}" fill="#fff"/><rect x="${fx}" y="${fy+9}" width="${w}" height="4" fill="#fff"/></g>`;
-    }
+    const w=30,h=22,fx=x-w/2,fy=yy+2; // Dannebrog-flag på snor
+    s+=`<g transform="rotate(${(i%2?-3:3)} ${x} ${yy})"><rect x="${fx}" y="${fy}" width="${w}" height="${h}" fill="#c8102e"/>
+      <rect x="${fx+10}" y="${fy}" width="4" height="${h}" fill="#fff"/><rect x="${fx}" y="${fy+9}" width="${w}" height="4" fill="#fff"/></g>`;
   }
   return s+"</svg>";
 }
