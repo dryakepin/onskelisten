@@ -137,15 +137,6 @@ export async function deleteGiver(fd: FormData) {
   revalidatePath("/", "layout");
 }
 
-/** Revoke a giver's personal link: old links and remembered devices stop working. */
-export async function regenerateLink(fd: FormData) {
-  await requireOwner();
-  const id = str(fd, "id");
-  const { data } = await db().from("givers").select("link_version").eq("id", id).single();
-  await db().from("givers").update({ link_version: (data?.link_version ?? 1) + 1 }).eq("id", id);
-  revalidatePath("/admin", "layout");
-}
-
 // ---------- Mail ----------
 
 export async function markMailSent(fd: FormData) {

@@ -2,25 +2,21 @@ import Link from "next/link";
 import WishCard from "@/components/WishCard";
 import { markBought, release, reserve } from "./actions";
 import { signInWithGoogle } from "./auth/actions";
-import { currentGiverSession } from "@/lib/giver";
+import { currentGiver } from "@/lib/giver";
 import { getOwnerEmail } from "@/lib/owner";
 import { listGivers, listWishes, reservationsForGivers } from "@/lib/queries";
 import { PRIORITIES, type Priority } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ link?: string }> }) {
-  const session = await currentGiverSession();
-  const { link } = await searchParams;
+export default async function Home() {
+  const giver = await currentGiver();
 
-  if (!session) {
+  if (!giver) {
     const owner = await getOwnerEmail();
     return (
       <main className="narrow">
         <h1>Kåres ønskeliste</h1>
-        {link === "ugyldigt" && (
-          <div className="banner warn">Linket virker ikke længere. Log ind med Google, eller brug linket fra Kåres nyeste mail.</div>
-        )}
         {owner ? (
           <p><Link href="/admin">Gå til din liste</Link></p>
         ) : (
@@ -29,13 +25,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ l
             <form action={signInWithGoogle}>
               <button className="btn primary" type="submit">Log ind med Google</button>
             </form>
-            <p className="muted small">Du kan også åbne listen med det personlige link fra Kåres mail.</p>
+            <p className="muted small">Brug den Google-konto, Kåre har skrevet til.</p>
           </>
         )}
       </main>
     );
   }
-  const { giver } = session;
 
   const [wishes, givers, reservations] = await Promise.all([listWishes(), listGivers(), reservationsForGivers()]);
   const visible = wishes.filter((w) => w.status === "active" && !w.suggested);

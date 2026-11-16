@@ -31,13 +31,10 @@ One-time setup for Supabase, Google sign-in and Vercel. Takes about 20 minutes. 
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon public key |
    | `SUPABASE_SERVICE_ROLE_KEY` | service_role key |
    | `OWNER_EMAILS` | your Google address |
-   | `LINK_SECRET` | output of `openssl rand -base64 48` |
    | `APP_URL` | `https://onskelisten.vercel.app` |
    | `CRON_SECRET` | output of `openssl rand -base64 32` |
 
 3. Redeploy. The weekly price refresh (Mondays 05:17 UTC) is set in `vercel.json`.
-
-`LINK_SECRET` signs every personal link. Changing it invalidates all family links at once, so set it once and keep it.
 
 ## 4. Import the current list
 
@@ -52,5 +49,5 @@ The import is safe to repeat: wishes match on their old id, family members on em
 ## 5. Check it works
 
 1. Open `https://onskelisten.vercel.app/login` and sign in with Google. You land on the list.
-2. **Familie** tab: copy the link for one person, open it in a private window, reserve a wish, then release it. Also ask one family member to try "Log ind med Google" with the address you listed for them.
+2. Ask one family member to open the site, press "Log ind med Google" with the address you listed for them, reserve a wish, then release it.
 3. **Send mail** tab: press "Åbn i Gmail" for yourself to see the message.

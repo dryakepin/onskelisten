@@ -14,16 +14,17 @@ export function wishesForOccasion(wishes: Wish[], occasion: Occasion): Wish[] {
   );
 }
 
-/** Plain-text mail for one giver. Short on purpose: the list itself lives behind the personal link. */
+/** Plain-text mail for one giver. Short on purpose: the list itself lives on the site, behind Google sign-in. */
 export function buildMail(opts: {
   name: string;
+  email: string;
   link: string;
   occasion: Occasion;
   wishes: Wish[];
   lastSend: MailSend | null;
   year: number;
 }): MailDraft {
-  const { name, link, occasion, wishes, lastSend, year } = opts;
+  const { name, email, link, occasion, wishes, lastSend, year } = opts;
   const sent = new Set(lastSend?.wish_ids ?? []);
   const live = new Set(wishes.map((w) => w.id));
   const fresh = lastSend ? wishes.filter((w) => !sent.has(w.id)) : [];
@@ -38,7 +39,7 @@ export function buildMail(opts: {
       ? `Her er en opdatering af min ønskeliste${occasion === "jul" ? " til jul" : ""}.`
       : `Så er der ønskeliste${occasion === "jul" ? " til jul" : ""}.`,
   );
-  lines.push("", "Dit personlige link til listen (du skal ikke logge ind):", link, "");
+  lines.push("", "Listen ligger her:", link, "", `Log ind med din Google-konto (${email}).`, "");
   lines.push("Tryk “Reservér” ved det, du vil give, så vi undgår at give det samme.", "");
 
   if (fresh.length) {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { fmtDate } from "@/components/WishCard";
 import { markMailSent } from "../actions";
-import { giverLink } from "@/lib/giver";
+import { env } from "@/lib/env";
 import { buildMail, gmailComposeUrl, wishesForOccasion } from "@/lib/mail";
 import { lastMailSend, listGivers, listWishes } from "@/lib/queries";
 import { occasionFor, seasonFor } from "@/lib/season";
@@ -16,7 +16,7 @@ export default async function MailPage({ searchParams }: { searchParams: Promise
   const list = wishesForOccasion(wishes, occasion);
   const recipients = givers.filter((g) => g.active_for_mail);
   const drafts = recipients.map((g) => {
-    const m = buildMail({ name: g.name, link: giverLink(g), occasion, wishes: list, lastSend: last, year: now.getFullYear() });
+    const m = buildMail({ name: g.name, email: g.email, link: env.appUrl(), occasion, wishes: list, lastSend: last, year: now.getFullYear() });
     return { g, m, href: gmailComposeUrl(g.email, m.subject, m.body) };
   });
   const sample = drafts.at(0)?.m;

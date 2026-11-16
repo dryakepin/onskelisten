@@ -12,17 +12,18 @@ describe("buildMail", () => {
   const wishes = [w("a", "Bog", { priority: 1 }), w("b", "Shorts", { price_amount: 580, currency: "DKK" })];
 
   it("first mail lists top wishes and the link", () => {
-    const m = buildMail({ name: "Mor", link: "https://x/f/t", occasion: "jul", wishes, lastSend: null, year: 2026 });
+    const m = buildMail({ name: "Mor", email: "mor@example.com", link: "https://x", occasion: "jul", wishes, lastSend: null, year: 2026 });
     expect(m.subject).toBe("Min ønskeliste til jul 2026");
     expect(m.body).toContain("Hej Mor");
-    expect(m.body).toContain("https://x/f/t");
+    expect(m.body).toContain("Listen ligger her:\nhttps://x\n");
+    expect(m.body).toContain("Log ind med din Google-konto (mor@example.com).");
     expect(m.body).toContain("- Bog");
     expect(m.newTitles).toEqual([]);
   });
 
   it("later mail shows new and removed since last send", () => {
     const last: MailSend = { id: "m", sent_at: "", occasion: "jul", recipient_ids: [], wish_ids: ["a", "gone"], wish_titles: { gone: "Gryde" } };
-    const m = buildMail({ name: "Thue", link: "L", occasion: "jul", wishes, lastSend: last, year: 2026 });
+    const m = buildMail({ name: "Thue", email: "t@example.com", link: "L", occasion: "jul", wishes, lastSend: last, year: 2026 });
     expect(m.newTitles).toEqual(["Shorts"]);
     expect(m.removedTitles).toEqual(["Gryde"]);
     expect(m.body).toMatch(/NYT SIDEN SIDST\n- Shorts \(580\s?kr\.\)/);

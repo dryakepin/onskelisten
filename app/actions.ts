@@ -7,7 +7,7 @@ import { currentGiver } from "@/lib/giver";
 
 async function giverOrFail() {
   const g = await currentGiver();
-  if (!g) throw new Error("Linket er ikke gyldigt længere. Brug det nyeste link fra Kåres mail.");
+  if (!g) throw new Error("Du er ikke logget ind længere. Log ind med Google igen.");
   return g;
 }
 

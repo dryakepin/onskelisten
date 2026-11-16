@@ -46,7 +46,6 @@ export interface Giver {
   name: string;
   email: string;
   active_for_mail: boolean;
-  link_version: number;
   last_seen_at: string | null;
   sort_order: number;
 }
