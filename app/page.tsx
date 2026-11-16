@@ -1,29 +1,41 @@
 import Link from "next/link";
 import WishCard from "@/components/WishCard";
 import { markBought, release, reserve } from "./actions";
-import { currentGiver } from "@/lib/giver";
+import { signInWithGoogle } from "./auth/actions";
+import { currentGiverSession } from "@/lib/giver";
+import { getOwnerEmail } from "@/lib/owner";
 import { listGivers, listWishes, reservationsForGivers } from "@/lib/queries";
 import { PRIORITIES, type Priority } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ link?: string }> }) {
-  const giver = await currentGiver();
+  const session = await currentGiverSession();
   const { link } = await searchParams;
 
-  if (!giver) {
+  if (!session) {
+    const owner = await getOwnerEmail();
     return (
       <main className="narrow">
         <h1>Kåres ønskeliste</h1>
-        {link === "ugyldigt" ? (
-          <div className="banner warn">Linket virker ikke længere. Brug linket fra Kåres nyeste mail, eller bed ham om et nyt.</div>
-        ) : (
-          <p>Åbn listen med linket fra Kåres mail – du skal ikke logge ind.</p>
+        {link === "ugyldigt" && (
+          <div className="banner warn">Linket virker ikke længere. Log ind med Google, eller brug linket fra Kåres nyeste mail.</div>
         )}
-        <p className="muted small"><Link href="/login">Er du Kåre? Log ind her.</Link></p>
+        {owner ? (
+          <p><Link href="/admin">Gå til din liste</Link></p>
+        ) : (
+          <>
+            <p>Log ind med din Google-konto for at se listen og reservere gaver.</p>
+            <form action={signInWithGoogle}>
+              <button className="btn primary" type="submit">Log ind med Google</button>
+            </form>
+            <p className="muted small">Du kan også åbne listen med det personlige link fra Kåres mail.</p>
+          </>
+        )}
       </main>
     );
   }
+  const { giver } = session;
 
   const [wishes, givers, reservations] = await Promise.all([listWishes(), listGivers(), reservationsForGivers()]);
   const visible = wishes.filter((w) => w.status === "active" && !w.suggested);
@@ -33,10 +45,15 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ l
 
   return (
     <>
-      <header>
-        <h1>Kåres ønskeliste</h1>
-        <p>Hej {giver.name}. Tryk “Reservér” ved det, du vil give – så kan de andre se, at det er taget.{mine ? ` Du har reserveret ${mine}.` : ""}</p>
-      </header>
+      <div className="topbar">
+        <header>
+          <h1>Kåres ønskeliste</h1>
+          <p>Hej {giver.name}. Tryk “Reservér” ved det, du vil give – så kan de andre se, at det er taget.{mine ? ` Du har reserveret ${mine}.` : ""}</p>
+        </header>
+        <form action="/auth/signout" method="post">
+          <button className="btn ghost sm" type="submit">Log ud</button>
+        </form>
+      </div>
       {visible.length === 0 && <div className="empty">Listen er tom lige nu.</div>}
       {([1, 2, 3] as Priority[]).map((p) => {
         const items = visible.filter((w) => w.priority === p);

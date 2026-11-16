@@ -20,12 +20,19 @@ export async function authClient() {
   });
 }
 
-/** The signed-in owner's email, or null. Verified against Supabase Auth, not just read from the cookie. */
-export async function getOwnerEmail(): Promise<string | null> {
+/** The Google-signed-in email, or null. Verified against Supabase Auth, not just read from the cookie. */
+export async function sessionEmail(): Promise<string | null> {
   const supabase = await authClient();
   const { data } = await supabase.auth.getUser();
-  const email = data.user?.email?.toLowerCase();
-  return email && env.ownerEmails().includes(email) ? email : null;
+  return data.user?.email?.toLowerCase() ?? null;
+}
+
+export const isOwnerEmail = (email: string) => env.ownerEmails().includes(email.toLowerCase());
+
+/** The signed-in owner's email, or null. */
+export async function getOwnerEmail(): Promise<string | null> {
+  const email = await sessionEmail();
+  return email && isOwnerEmail(email) ? email : null;
 }
 
 export async function requireOwner(): Promise<string> {

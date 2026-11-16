@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { requireOwner } from "@/lib/owner";
+import { isOwnerEmail, requireOwner } from "@/lib/owner";
 import { isCurrency, parseAmount } from "@/lib/price";
 import { fetchProduct, type ProductInfo } from "@/lib/scrape";
 import { CATEGORIES, type Occasion } from "@/lib/types";
@@ -118,6 +118,8 @@ export async function saveGiver(fd: FormData) {
   const name = str(fd, "name", 60);
   const email = str(fd, "email", 120).toLowerCase();
   if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Navn og en gyldig email er påkrævet");
+  // The owner must never be a giver: giver views show reservations.
+  if (isOwnerEmail(email)) throw new Error("Din egen adresse kan ikke stå på familielisten");
   if (id) await db().from("givers").update({ name, email }).eq("id", id);
   else await db().from("givers").insert({ name, email, sort_order: Date.now() % 1e9 });
   revalidatePath("/admin", "layout");

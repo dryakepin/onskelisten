@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { authClient } from "@/lib/owner";
-import { env } from "@/lib/env";
+import { db } from "@/lib/db";
+import { giverFromEmail } from "@/lib/giver";
+import { authClient, isOwnerEmail } from "@/lib/owner";
 
+/** Google sign-in lands here. The owner goes to the admin pages, a family member to the list, anyone else is signed out. */
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   if (!code) return NextResponse.redirect(new URL("/login?fejl=google", request.url));
@@ -9,9 +11,12 @@ export async function GET(request: NextRequest) {
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   const email = data.user?.email?.toLowerCase();
   if (error || !email) return NextResponse.redirect(new URL("/login?fejl=google", request.url));
-  if (!env.ownerEmails().includes(email)) {
+  if (isOwnerEmail(email)) return NextResponse.redirect(new URL("/admin", request.url));
+  const giver = await giverFromEmail(email);
+  if (!giver) {
     await supabase.auth.signOut();
     return NextResponse.redirect(new URL("/login?fejl=adgang", request.url));
   }
-  return NextResponse.redirect(new URL("/admin", request.url));
+  await db().from("givers").update({ last_seen_at: new Date().toISOString() }).eq("id", giver.id);
+  return NextResponse.redirect(new URL("/", request.url));
 }

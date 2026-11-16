@@ -2,6 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { db } from "./db";
 import { env } from "./env";
+import { isOwnerEmail, sessionEmail } from "./owner";
 import { parseGiverToken, signGiverToken, verifyGiverToken } from "./tokens";
 import type { Giver } from "./types";
 
@@ -22,7 +23,26 @@ export async function giverFromToken(token: string): Promise<Giver | null> {
   return verifyGiverToken(token, data.link_version, env.linkSecret()) ? data : null;
 }
 
-export async function currentGiver(): Promise<Giver | null> {
+/** The giver whose email matches, or null. The owner is never a giver: that would show him the reservations. */
+export async function giverFromEmail(email: string): Promise<Giver | null> {
+  const e = email.trim().toLowerCase();
+  if (!e || isOwnerEmail(e)) return null;
+  const { data } = await db().from("givers").select("*").eq("email", e).maybeSingle<Giver>();
+  return data ?? null;
+}
+
+export type GiverSession = { giver: Giver; via: "link" | "google" };
+
+/** Who is looking at the list: a personal-link cookie first, otherwise a Google sign-in whose email is on the family list. */
+export async function currentGiverSession(): Promise<GiverSession | null> {
   const token = (await cookies()).get(GIVER_COOKIE)?.value;
-  return token ? giverFromToken(token) : null;
+  const byLink = token ? await giverFromToken(token) : null;
+  if (byLink) return { giver: byLink, via: "link" };
+  const email = await sessionEmail();
+  const byGoogle = email ? await giverFromEmail(email) : null;
+  return byGoogle ? { giver: byGoogle, via: "google" } : null;
+}
+
+export async function currentGiver(): Promise<Giver | null> {
+  return (await currentGiverSession())?.giver ?? null;
 }
