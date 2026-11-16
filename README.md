@@ -8,4 +8,13 @@ Kåre's family wish list as a hosted web app: Kåre maintains the list, and fami
 
 ## Status
 
-Repository created. Product description in review; no code yet.
+v1 skeleton: owner list management, giver links and reservations, Gmail compose links, seasonal themes, weekly price refresh. Not deployed yet: see [SETUP.md](SETUP.md).
+
+## Development
+
+```
+cp .env.example .env.local   # fill in values from SETUP.md
+npm install
+npm run dev                  # http://localhost:3000
+npm test && npm run typecheck
+```
