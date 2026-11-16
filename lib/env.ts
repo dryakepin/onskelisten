@@ -10,7 +10,6 @@ export const env = {
   supabaseUrl: () => need("NEXT_PUBLIC_SUPABASE_URL"),
   supabaseAnonKey: () => need("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
   serviceRoleKey: () => need("SUPABASE_SERVICE_ROLE_KEY"),
-  linkSecret: () => need("LINK_SECRET"),
   appUrl: () => (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, ""),
   ownerEmails: () =>
     need("OWNER_EMAILS")

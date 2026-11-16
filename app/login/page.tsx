@@ -23,7 +23,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <form action={signInWithGoogle}>
         <button className="btn primary" type="submit">Log ind med Google</button>
       </form>
-      <p className="muted small">Du kan også åbne listen med det personlige link fra Kåres mail.</p>
+      <p className="muted small">Brug den Google-konto, Kåre har skrevet til.</p>
     </main>
   );
 }

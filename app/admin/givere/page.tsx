@@ -1,15 +1,13 @@
-import CopyButton from "@/components/CopyButton";
 import ConfirmButton from "@/components/ConfirmButton";
 import { fmtDate } from "@/components/WishCard";
-import { deleteGiver, regenerateLink, saveGiver, toggleGiverMail } from "../actions";
-import { giverLink } from "@/lib/giver";
+import { deleteGiver, saveGiver, toggleGiverMail } from "../actions";
 import { listGivers } from "@/lib/queries";
 
 export default async function GiversPage() {
   const givers = await listGivers();
   return (
     <>
-      <p className="muted">Familien logger ind med Google (adressen herunder skal være deres Google-konto) eller åbner listen med deres personlige link. Et nyt link gør det gamle ugyldigt.</p>
+      <p className="muted">Familien logger ind med Google. Adressen herunder skal være deres Google-konto – kun de adresser kan se listen.</p>
       <div className="recips">
         {givers.map((g) => (
           <div className="rrow giver" key={g.id}>
@@ -25,8 +23,6 @@ export default async function GiversPage() {
                 <input type="hidden" name="active" value={g.active_for_mail ? "0" : "1"} />
                 <button className="btn ghost sm" type="submit">{g.active_for_mail ? "✓ Får mail" : "Får ikke mail"}</button>
               </form>
-              <CopyButton text={giverLink(g)} />
-              <ConfirmButton action={regenerateLink} fields={{ id: g.id }} label="Nyt link" confirmLabel="Lav nyt link (det gamle stopper)" />
               <ConfirmButton action={deleteGiver} fields={{ id: g.id }} label="Fjern" confirmLabel={`Fjern ${g.name}`} />
               <span className="status">{g.last_seen_at ? `Sidst set ${fmtDate(g.last_seen_at)}` : "Har ikke åbnet listen endnu"}</span>
             </div>
