@@ -11,7 +11,7 @@ One-time setup for Supabase, Google sign-in and Vercel. Takes about 20 minutes. 
 ## 2. Google sign-in (owner and family)
 
 1. https://console.cloud.google.com → create a project (e.g. "Ønskelisten").
-2. **APIs & Services → OAuth consent screen:** External, app name "Kåres ønskeliste", your email as support and developer contact. Then press **Publish app**: the app only asks for name and email, so Google needs no review, and any family member can sign in. (The app itself only lets in addresses on the Familie tab.)
+2. **APIs & Services → OAuth consent screen:** External, app name "Kåres ønskeliste", your email as support and developer contact. Leave it in *Testing* and add every family member's Google address under **Audience → Test users** (up to 100): only test users can sign in. **Publish app** stays greyed out until the Branding page has a homepage and a privacy policy address; do that later if adding test users becomes a chore.
 3. **APIs & Services → Credentials → Create credentials → OAuth client ID:** type *Web application*.
    - Authorized redirect URI: `https://<your-project-ref>.supabase.co/auth/v1/callback`
 4. Copy the **Client ID** and **Client secret**.
