@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { signInWithGoogle } from "../auth/actions";
+import Hero from "@/components/Hero";
 import { currentGiver } from "@/lib/giver";
 import { getOwnerEmail } from "@/lib/owner";
 
@@ -9,7 +10,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { fejl, grund } = await searchParams;
   return (
     <main className="narrow">
-      <h1>Kåres ønskeliste</h1>
+      <Hero><h1>Kåres ønskeliste</h1></Hero>
       <p className="muted">Log ind med din Google-konto for at se listen og reservere gaver.</p>
       {fejl === "adgang" && (
         <div className="banner warn">Den Google-konto er ikke på familielisten. Prøv en anden konto, eller bed Kåre om at tilføje din adresse.</div>

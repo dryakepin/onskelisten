@@ -15,7 +15,8 @@ Kåre's family wish list. Product description: https://claude.ai/artifact/5mtsQb
 - `app/page.tsx` giver list (reserve / bought / release)
 - `app/admin/*` owner pages; `app/admin/actions.ts` owner server actions (each starts with `requireOwner()`)
 - `lib/` pure helpers (`price`, `season`, `mail`, `scrape`) are unit-tested in `tests/`
-- `components/decor.ts` seasonal SVG builders ported from the artifact
+- `components/decor.ts` seasonal SVG builders (garlands, snow, Santa, the calendar candle) · `components/Hero.tsx` page header with countdown and candle
+- Christmas theme: dark page with paper cards, so colour variables are set twice in `app/globals.css` (page, then paper surfaces). Preview dates with `#jul-9` (9 December), `#jul`, `#foedselsdag`
 - `supabase/migrations/` schema; `supabase/seed.sql` is fictional local data
 - Local database: `supabase start` (ports 553xx, so it can run beside other projects), `supabase db reset` to re-apply migrations and seed
 

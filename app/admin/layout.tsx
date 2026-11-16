@@ -1,4 +1,5 @@
 import AdminNav from "@/components/AdminNav";
+import Hero from "@/components/Hero";
 import { requireOwner } from "@/lib/owner";
 import { listWishes, lastMailSend } from "@/lib/queries";
 import { fmtDate } from "@/components/WishCard";
@@ -13,10 +14,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <>
       <div className="topbar">
-        <header>
-          <h1>Kåres ønskeliste</h1>
-          <p>{active} aktive ønsker{last ? ` · sidste mail ${fmtDate(last.sent_at)}` : ""}</p>
-        </header>
+        <Hero>
+          <header>
+            <h1>Kåres ønskeliste</h1>
+            <p>{active} aktive ønsker{last ? ` · sidste mail ${fmtDate(last.sent_at)}` : ""}</p>
+          </header>
+        </Hero>
         <form action="/auth/signout" method="post">
           <button className="btn ghost sm" type="submit">Log ud</button>
         </form>
